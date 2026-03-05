@@ -372,6 +372,88 @@
       color: #bbb;
     }
 
+    /* ── PAPERS ── */
+    .paper-list { display: flex; flex-direction: column; gap: 1.6rem; }
+
+    .paper-card {
+      border: 1px solid #e5e5e5;
+      border-radius: 3px;
+      padding: 1.4rem 1.6rem;
+      transition: border-color .15s;
+    }
+    .paper-card:hover { border-color: #bbb; }
+
+    .paper-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: .55rem;
+    }
+
+    .paper-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111;
+      line-height: 1.4;
+    }
+    .paper-title a { color: inherit; }
+    .paper-title a:hover { color: #1a4fbf; text-decoration: none; }
+
+    .paper-date {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .65rem;
+      color: #aaa;
+      white-space: nowrap;
+      padding-top: .1rem;
+    }
+
+    .paper-authors {
+      font-size: .83rem;
+      color: #666;
+      margin-bottom: .55rem;
+    }
+    .paper-authors .me { color: #1a4fbf; font-weight: 500; }
+
+    .paper-abstract {
+      font-size: .87rem;
+      color: #444;
+      line-height: 1.7;
+      margin-bottom: .75rem;
+    }
+
+    .paper-footer {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .paper-links { display: flex; gap: .5rem; }
+
+    .paper-link {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .68rem;
+      color: #555;
+      border: 1px solid #d5d5d5;
+      border-radius: 2px;
+      padding: .18rem .55rem;
+      text-decoration: none;
+      transition: border-color .15s, color .15s;
+    }
+    .paper-link:hover { border-color: #999; color: #111; text-decoration: none; }
+
+    .paper-tags { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .paper-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .62rem;
+      padding: .15rem .45rem;
+      background: #f5f5f5;
+      color: #777;
+      border-radius: 2px;
+    }
+
     /* ── CITATION ── */
     .bibtex-wrap {
       border: 1px solid #e5e5e5;
@@ -452,6 +534,7 @@
     <li><a href="#abstract">Abstract</a></li>
     <li><a href="#framework">Framework</a></li>
     <li><a href="#paradigms">Paradigms</a></li>
+    <li><a href="#papers">Papers</a></li>
     <li><a href="#citation">Cite</a></li>
   </ul>
 </nav>
@@ -709,6 +792,76 @@
       <div class="tl-name">Agentic TSF</div>
       <div class="tl-eg">ATSF</div>
     </div>
+  </div>
+</div>
+
+<!-- PAPERS -->
+<div id="papers" class="section">
+  <h2>Related Work</h2>
+  <p style="font-size:.88rem;color:#777;margin-bottom:1.4rem;margin-top:-.6rem">
+    A curated list of papers on agentic time series forecasting. Maintained alongside this position paper.
+  </p>
+  <div class="paper-list">
+
+    <div class="paper-card">
+      <div class="paper-card-top">
+        <div class="paper-title">
+          <a href="https://arxiv.org/abs/2602.13802" target="_blank" rel="noopener">
+            Cast-R1: Learning Tool-Augmented Sequential Decision Policies for Time Series Forecasting
+          </a>
+        </div>
+        <div class="paper-date">arXiv &middot; Feb 2026</div>
+      </div>
+      <div class="paper-authors">
+        Xiaoyu Tao, <span class="me">Mingyue Cheng</span>, Chuang Jiang, Tian Gao, Huanjian Zhang, Yaguo Liu
+      </div>
+      <div class="paper-abstract">
+        Reformulates time series forecasting as a sequential decision-making problem rather than a static input-output mapping. Introduces a memory-based state management mechanism that maintains decision-relevant context across multi-step interactions, combined with a tool-augmented agentic workflow for feature extraction, model invocation, and iterative refinement. Trained via dual-stage supervised fine-tuning and multi-turn reinforcement learning with curriculum learning.
+      </div>
+      <div class="paper-footer">
+        <div class="paper-links">
+          <a href="https://arxiv.org/abs/2602.13802" target="_blank" rel="noopener" class="paper-link">arXiv</a>
+          <a href="https://arxiv.org/pdf/2602.13802" target="_blank" rel="noopener" class="paper-link">PDF</a>
+          <a href="https://github.com/Xiaoyu-Tao/Cast-R1-TS" target="_blank" rel="noopener" class="paper-link">Code</a>
+        </div>
+        <div class="paper-tags">
+          <span class="paper-tag">Agentic Forecasting</span>
+          <span class="paper-tag">Sequential Decision-Making</span>
+          <span class="paper-tag">Tool Use</span>
+          <span class="paper-tag">Reinforcement Learning</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="paper-card">
+      <div class="paper-card-top">
+        <div class="paper-title">
+          <a href="https://arxiv.org/abs/2511.08947" target="_blank" rel="noopener">
+            CastMind: An Interaction-Driven Agentic Reasoning Framework for Cognition-Inspired Time Series Forecasting
+          </a>
+        </div>
+        <div class="paper-date">arXiv &middot; Nov 2025</div>
+      </div>
+      <div class="paper-authors">
+        Xiaohan Zhang, Tian Gao, <span class="me">Mingyue Cheng</span>, Bokai Pan, Ze Guo, Yaguo Liu, Xiaoyu Tao, Qi Liu
+      </div>
+      <div class="paper-abstract">
+        Proposes an LLM-based agentic framework that reimagines time series forecasting through iterative, expert-like reasoning rather than single-pass regression. Integrates temporal features, domain knowledge, historical case references, and contextual information through a multi-stage workflow: context preparation, reasoning-based generation, and reflective evaluation. Achieves training-free forecasting while demonstrating superior performance across multiple benchmarks.
+      </div>
+      <div class="paper-footer">
+        <div class="paper-links">
+          <a href="https://arxiv.org/abs/2511.08947" target="_blank" rel="noopener" class="paper-link">arXiv</a>
+          <a href="https://arxiv.org/pdf/2511.08947" target="_blank" rel="noopener" class="paper-link">PDF</a>
+        </div>
+        <div class="paper-tags">
+          <span class="paper-tag">Agentic Reasoning</span>
+          <span class="paper-tag">LLM-Based Forecasting</span>
+          <span class="paper-tag">Training-Free</span>
+          <span class="paper-tag">Reflective Evaluation</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 

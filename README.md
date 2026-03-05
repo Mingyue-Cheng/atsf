@@ -37,6 +37,15 @@ We propose three concrete paradigms spanning the interpretability–adaptability
 
 University of Science and Technology of China
 
+## Related Work
+
+A curated list of papers on agentic time series forecasting, maintained alongside this position paper.
+
+| Paper | Authors | Venue | Links |
+|-------|---------|-------|-------|
+| **Cast-R1**: Learning Tool-Augmented Sequential Decision Policies for Time Series Forecasting | Xiaoyu Tao, **Mingyue Cheng**, et al. | arXiv Feb 2026 | [arXiv](https://arxiv.org/abs/2602.13802) · [Code](https://github.com/Xiaoyu-Tao/Cast-R1-TS) |
+| **CastMind**: An Interaction-Driven Agentic Reasoning Framework for Cognition-Inspired Time Series Forecasting | Xiaohan Zhang, **Mingyue Cheng**, et al. | arXiv Nov 2025 | [arXiv](https://arxiv.org/abs/2511.08947) |
+
 ## Citation
 
 ```bibtex
