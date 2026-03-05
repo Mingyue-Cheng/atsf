@@ -7,1089 +7,720 @@
   <meta name="description" content="Position: Beyond Model-Centric Prediction — Agentic Time Series Forecasting. Mingyue Cheng et al. arXiv:2602.01776">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,300;1,8..60,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Source+Sans+3:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <style>
-    /* =====================================================================
-       DESIGN TOKENS — light academic palette
-    ===================================================================== */
-    :root {
-      --bg-deep:    #f7f6f2;      /* warm off-white, like aged paper */
-      --bg-mid:     #eeecea;      /* very light warm gray */
-      --bg-card:    #ffffff;
-      --bg-card-h:  #f9f8f5;
-      --border:     rgba(0,0,0,.08);
-      --border-b:   rgba(26,62,120,.22);
-      --blue:       #1a3e78;      /* primary academic navy */
-      --blue-10:    rgba(26,62,120,.10);
-      --blue-06:    rgba(26,62,120,.06);
-      --amber:      #b5601a;      /* warm scholarly amber */
-      --amber-10:   rgba(181,96,26,.10);
-      --amber-06:   rgba(181,96,26,.06);
-      --purple:     #5a3fa0;
-      --pink:       #a03050;
-      --green:      #1a6a3e;
-      --text-1:     #18181b;
-      --text-2:     #52525b;
-      --text-3:     #a1a1aa;
-      --ff-serif:  'DM Serif Display', Georgia, serif;
-      --ff-body:   'Source Serif 4', Georgia, serif;
-      --ff-mono:   'IBM Plex Mono', 'Courier New', monospace;
-    }
-
-    /* =====================================================================
-       RESET & BASE
-    ===================================================================== */
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
 
     body {
-      background: var(--bg-deep);
-      color: var(--text-1);
-      font-family: var(--ff-body);
-      font-size: 17px;
-      line-height: 1.78;
-      overflow-x: hidden;
+      background: #fff;
+      color: #111;
+      font-family: 'Source Sans 3', system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
     }
 
-    a { color: inherit; text-decoration: none; }
+    a { color: #1a4fbf; text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
-    /* =====================================================================
-       NAVIGATION
-    ===================================================================== */
+    /* ── NAV ── */
     nav {
-      position: fixed; top:0; left:0; right:0; z-index:200;
-      display: flex; justify-content:space-between; align-items:center;
-      padding: .85rem 2.5rem;
-      background: rgba(247,246,242,.94);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #e5e5e5;
+      padding: .75rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 100;
     }
 
-    .nav-brand {
-      font-family: var(--ff-mono);
-      font-size: .68rem;
-      color: var(--blue);
-      letter-spacing: .15em;
-      text-transform: uppercase;
+    .nav-id {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem;
+      color: #888;
+      letter-spacing: .04em;
     }
 
     .nav-links {
       list-style: none;
       display: flex;
-      gap: 2.2rem;
+      gap: 1.8rem;
     }
 
     .nav-links a {
-      font-family: var(--ff-mono);
-      font-size: .68rem;
-      color: var(--text-3);
-      letter-spacing: .10em;
-      text-transform: uppercase;
-      transition: color .2s;
+      font-size: .85rem;
+      color: #555;
+      text-decoration: none;
     }
 
-    .nav-links a:hover,
-    .nav-links a.active { color: var(--blue); }
+    .nav-links a:hover { color: #111; text-decoration: none; }
 
-    /* =====================================================================
-       HERO
-    ===================================================================== */
+    /* ── HERO ── */
     #hero {
-      position: relative;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background: var(--bg-deep);
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 5rem 2rem 3.5rem;
+      border-bottom: 1px solid #e5e5e5;
     }
 
-    #hero-canvas {
-      position: absolute;
-      inset: 0;
-      opacity: .18;
-    }
-
-    #hero::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 75% 65% at 50% 50%, transparent 35%, var(--bg-deep) 100%);
-      pointer-events: none;
-    }
-
-    .hero-inner {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-      max-width: 840px;
-      padding: 9rem 2rem 5rem;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .28rem 1rem;
-      border-radius: 2rem;
-      background: var(--amber-06);
-      border: 1px solid rgba(181,96,26,.22);
-      font-family: var(--ff-mono);
-      font-size: .66rem;
-      color: var(--amber);
-      letter-spacing: .14em;
+    .paper-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem;
+      color: #888;
+      letter-spacing: .08em;
       text-transform: uppercase;
-      margin-bottom: 1.8rem;
-      animation: fadeUp .65s .05s both;
-    }
-
-    .hero-badge::before {
-      content: '';
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: var(--amber);
-      animation: blink 2.4s infinite;
-    }
-
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
-
-    .hero-type {
-      font-family: var(--ff-mono);
-      font-size: .68rem;
-      color: var(--blue);
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      margin-bottom: .9rem;
-      animation: fadeUp .65s .12s both;
+      margin-bottom: 1.2rem;
     }
 
     h1 {
-      font-family: var(--ff-serif);
-      font-size: clamp(1.9rem, 4.5vw, 3.4rem);
-      line-height: 1.22;
-      color: var(--text-1);
-      margin-bottom: 2rem;
-      animation: fadeUp .65s .2s both;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 600;
+      line-height: 1.28;
+      color: #111;
+      margin-bottom: 1.8rem;
     }
 
-    h1 em {
-      color: var(--blue);
-      font-style: italic;
+    .author-block {
+      margin-bottom: .4rem;
     }
 
-    .hero-authors {
+    .authors {
+      font-size: .95rem;
+      color: #333;
+      margin-bottom: .3rem;
+    }
+
+    .authors .lead { font-weight: 500; }
+
+    .affil {
+      font-size: .85rem;
+      color: #777;
+      margin-bottom: 1.8rem;
+    }
+
+    .links {
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
-      gap: .35rem 1.4rem;
-      margin-bottom: .55rem;
-      animation: fadeUp .65s .3s both;
+      gap: .6rem;
     }
 
-    .author {
-      font-family: var(--ff-body);
-      font-size: 1rem;
-      color: var(--text-2);
-    }
-
-    .author.lead {
-      color: var(--blue);
-      font-weight: 500;
-    }
-
-    .hero-affil {
-      font-family: var(--ff-mono);
-      font-size: .68rem;
-      color: var(--text-3);
-      letter-spacing: .06em;
-      margin-bottom: 2.6rem;
-      animation: fadeUp .65s .38s both;
-    }
-
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: .85rem;
-      animation: fadeUp .65s .46s both;
-    }
-
-    .btn {
+    .link-btn {
       display: inline-flex;
       align-items: center;
-      gap: .45rem;
-      padding: .65rem 1.5rem;
-      border-radius: 4px;
-      font-family: var(--ff-mono);
-      font-size: .76rem;
-      font-weight: 500;
-      letter-spacing: .07em;
-      cursor: pointer;
-      border: none;
-      transition: transform .2s, box-shadow .2s, background .2s, color .2s, border-color .2s;
+      gap: .35rem;
+      padding: .42rem 1rem;
+      border: 1px solid #d0d0d0;
+      border-radius: 3px;
+      font-size: .82rem;
+      color: #333;
+      text-decoration: none;
+      transition: border-color .15s, background .15s;
     }
 
-    .btn-fill {
-      background: var(--blue);
+    .link-btn:hover {
+      border-color: #999;
+      background: #f8f8f8;
+      text-decoration: none;
+      color: #111;
+    }
+
+    .link-btn.primary {
+      background: #1a4fbf;
+      border-color: #1a4fbf;
       color: #fff;
     }
 
-    .btn-fill:hover {
-      background: #1e4d96;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 22px rgba(26,62,120,.25);
+    .link-btn.primary:hover {
+      background: #1744a8;
+      border-color: #1744a8;
+      color: #fff;
     }
 
-    .btn-outline {
-      background: transparent;
-      color: var(--blue);
-      border: 1.5px solid rgba(26,62,120,.35);
-    }
-
-    .btn-outline:hover {
-      border-color: var(--blue);
-      background: var(--blue-06);
-      transform: translateY(-2px);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-3);
-      border: 1.5px solid var(--border);
-    }
-
-    .btn-ghost:hover {
-      color: var(--text-2);
-      border-color: rgba(0,0,0,.18);
-      transform: translateY(-2px);
-    }
-
-    /* =====================================================================
-       COMMON SECTION CHROME
-    ===================================================================== */
-    .sec { padding: 6rem 0; }
-
-    .sec-inner {
-      max-width: 1080px;
+    /* ── SECTIONS ── */
+    .section {
+      max-width: 780px;
       margin: 0 auto;
-      padding: 0 2rem;
-    }
-
-    .sec-label {
-      font-family: var(--ff-mono);
-      font-size: .66rem;
-      color: var(--blue);
-      letter-spacing: .26em;
-      text-transform: uppercase;
-      margin-bottom: .65rem;
+      padding: 3rem 2rem;
+      border-bottom: 1px solid #e5e5e5;
     }
 
     h2 {
-      font-family: var(--ff-serif);
-      font-size: clamp(1.65rem, 2.8vw, 2.5rem);
-      line-height: 1.24;
-      color: var(--text-1);
-      margin-bottom: 2.4rem;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #111;
+      margin-bottom: 1.2rem;
     }
 
-    .hr {
-      border: none;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(0,0,0,.10) 50%, transparent);
+    p { color: #333; margin-bottom: 1rem; }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── ABSTRACT ── */
+    .abstract-text {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: .97rem;
+      line-height: 1.85;
+      color: #222;
     }
 
-    /* =====================================================================
-       ABSTRACT
-    ===================================================================== */
-    #abstract { background: var(--bg-mid); }
-
-    .abstract-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 2.4rem 3rem;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    .tldr {
+      background: #f7f7f7;
+      border-left: 3px solid #1a4fbf;
+      padding: .85rem 1.1rem;
+      margin-bottom: 1.4rem;
+      font-size: .92rem;
+      color: #333;
     }
 
-    .abstract-card::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: linear-gradient(180deg, var(--blue), var(--amber));
-    }
-
-    .tldr-row {
-      display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-      background: var(--blue-06);
-      border: 1px solid rgba(26,62,120,.12);
-      border-radius: 6px;
-      padding: 1.1rem 1.4rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .tldr-pill {
-      font-family: var(--ff-mono);
-      font-size: .64rem;
-      color: var(--blue);
-      letter-spacing: .14em;
+    .tldr strong {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .72rem;
+      font-weight: 500;
+      color: #1a4fbf;
+      letter-spacing: .06em;
       text-transform: uppercase;
-      white-space: nowrap;
-      padding-top: .18rem;
+      display: block;
+      margin-bottom: .3rem;
     }
 
-    .tldr-row p { font-size: .94rem; color: var(--text-1); line-height: 1.65; }
-
-    .abstract-body { color: var(--text-2); font-size: 1.02rem; line-height: 1.9; }
-    .abstract-body strong { color: var(--text-1); font-weight: 500; }
-
-    /* =====================================================================
-       FRAMEWORK
-    ===================================================================== */
-    #framework { background: var(--bg-deep); }
-
-    .fw-grid {
+    /* ── FRAMEWORK ── */
+    .fw-layout {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: center;
+      grid-template-columns: 340px 1fr;
+      gap: 3rem;
+      align-items: start;
     }
 
-    .fw-diagram svg { width: 100%; height: auto; display: block; }
+    .fw-diagram svg { width: 100%; height: auto; }
 
     .flow-arc {
-      stroke-dasharray: 6 5;
-      animation: arcFlow 2.8s linear infinite;
+      stroke-dasharray: 5 4;
+      animation: dash 3s linear infinite;
     }
+    @keyframes dash { to { stroke-dashoffset: -36; } }
 
-    @keyframes arcFlow { to { stroke-dashoffset: -44; } }
-
-    .pillar-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
+    .pillar-list { display: flex; flex-direction: column; gap: .1rem; }
 
     .pillar {
+      padding: .7rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .pillar:last-child { border-bottom: none; }
+
+    .pillar-head {
       display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-      padding: 1rem 1.2rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      opacity: 0;
-      transform: translateX(16px);
-      transition: opacity .5s, transform .5s, border-color .25s, box-shadow .25s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      align-items: baseline;
+      gap: .5rem;
+      margin-bottom: .2rem;
     }
 
-    .pillar.in { opacity: 1; transform: translateX(0); }
-
-    .pillar:hover {
-      border-color: rgba(26,62,120,.2);
-      box-shadow: 0 3px 12px rgba(26,62,120,.08);
-    }
-
-    .pillar-icon {
-      width: 32px; height: 32px;
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      font-size: .95rem;
-    }
-
-    .pillar-body h4 {
-      font-family: var(--ff-mono);
-      font-size: .8rem;
+    .pillar-name {
       font-weight: 500;
-      color: var(--text-1);
-      margin-bottom: .22rem;
-      letter-spacing: .04em;
+      font-size: .94rem;
+      color: #111;
     }
 
-    .pillar-body p { font-size: .84rem; color: var(--text-2); line-height: 1.62; }
+    .pillar-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .62rem;
+      color: #aaa;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
 
-    /* =====================================================================
-       CONTRIBUTIONS
-    ===================================================================== */
-    #contributions { background: var(--bg-mid); }
+    .pillar p { font-size: .88rem; color: #555; margin: 0; line-height: 1.65; }
 
-    .contrib-grid {
+    /* ── CONTRIBUTIONS ── */
+    .contrib-list {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.3rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem 2rem;
     }
 
-    .contrib-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 1.8rem 2rem;
-      opacity: 0;
-      transform: translateY(16px);
-      transition: opacity .5s, transform .5s, border-color .25s, box-shadow .25s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    .contrib-item {}
+
+    .contrib-item h4 {
+      font-size: .93rem;
+      font-weight: 500;
+      color: #111;
+      margin-bottom: .3rem;
     }
 
-    .contrib-card.in { opacity: 1; transform: translateY(0); }
+    .contrib-item p { font-size: .87rem; color: #555; margin: 0; }
 
-    .contrib-card:hover {
-      border-color: rgba(26,62,120,.2);
-      box-shadow: 0 4px 16px rgba(26,62,120,.08);
-      transform: translateY(-3px);
+    .contrib-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      color: #ccc;
+      margin-bottom: .2rem;
     }
 
-    .c-num {
-      font-family: var(--ff-mono);
-      font-size: 2.2rem;
-      font-weight: 300;
-      color: rgba(26,62,120,.12);
-      line-height: 1;
-      margin-bottom: .6rem;
-    }
+    /* ── PARADIGMS ── */
+    .paradigm-list { display: flex; flex-direction: column; gap: 1.4rem; }
 
-    .c-title {
-      font-family: var(--ff-serif);
-      font-size: 1.1rem;
-      color: var(--text-1);
-      margin-bottom: .35rem;
-    }
-
-    .c-body { font-size: .86rem; color: var(--text-2); line-height: 1.72; }
-
-    /* =====================================================================
-       PARADIGMS
-    ===================================================================== */
-    #paradigms { background: var(--bg-deep); }
-
-    .paradigm-grid {
+    .paradigm {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.3rem;
+      grid-template-columns: 180px 1fr;
+      gap: 1.5rem;
+      padding-bottom: 1.4rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .paradigm:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .paradigm-meta {}
+    .paradigm-idx {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .65rem;
+      color: #bbb;
+      letter-spacing: .1em;
+      margin-bottom: .3rem;
+    }
+    .paradigm-name {
+      font-weight: 500;
+      font-size: .94rem;
+      color: #111;
+      margin-bottom: .15rem;
+    }
+    .paradigm-abbr {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      color: #888;
     }
 
-    .p-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 1.8rem 2rem;
+    .paradigm-body {}
+    .paradigm-body p { font-size: .88rem; color: #444; margin-bottom: .6rem; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .62rem;
+      padding: .18rem .5rem;
+      border-radius: 2px;
+    }
+    .tag-pro { background: #eef3ff; color: #1a4fbf; }
+    .tag-con { background: #fdf4ec; color: #a0521a; }
+
+    /* ── TIMELINE ── */
+    .timeline {
+      display: flex;
+      gap: 0;
       position: relative;
-      overflow: hidden;
-      transition: transform .3s, border-color .25s, box-shadow .3s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      margin-top: .5rem;
     }
 
-    .p-card::after {
+    .tl-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .tl-item::before {
       content: '';
       position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 2px;
-      opacity: 0;
-      transition: opacity .3s;
-    }
-
-    .p-card:nth-child(1)::after { background: var(--blue); }
-    .p-card:nth-child(2)::after { background: var(--amber); }
-    .p-card:nth-child(3)::after { background: var(--purple); }
-
-    .p-card:hover {
-      transform: translateY(-5px);
-      border-color: rgba(0,0,0,.14);
-      box-shadow: 0 6px 24px rgba(0,0,0,.08);
-    }
-
-    .p-card:hover::after { opacity: 1; }
-
-    .p-idx {
-      font-family: var(--ff-mono);
-      font-size: .62rem;
-      color: var(--text-3);
-      letter-spacing: .2em;
-      margin-bottom: .85rem;
-    }
-
-    .p-title {
-      font-family: var(--ff-serif);
-      font-size: 1.18rem;
-      color: var(--text-1);
-      margin-bottom: .18rem;
-    }
-
-    .p-sub {
-      font-family: var(--ff-mono);
-      font-size: .66rem;
-      color: var(--blue);
-      letter-spacing: .06em;
-      margin-bottom: .95rem;
-    }
-
-    .p-card:nth-child(2) .p-sub { color: var(--amber); }
-    .p-card:nth-child(3) .p-sub { color: var(--purple); }
-
-    .p-body { font-size: .85rem; color: var(--text-2); line-height: 1.72; margin-bottom: 1.3rem; }
-
-    .tags { display: flex; flex-wrap: wrap; gap: .4rem; }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      gap: .28rem;
-      padding: .2rem .55rem;
-      border-radius: 3px;
-      font-family: var(--ff-mono);
-      font-size: .61rem;
-      letter-spacing: .04em;
-    }
-
-    .tag-pro {
-      background: var(--blue-06);
-      color: var(--blue);
-      border: 1px solid rgba(26,62,120,.18);
-    }
-
-    .tag-con {
-      background: var(--amber-06);
-      color: var(--amber);
-      border: 1px solid rgba(181,96,26,.18);
-    }
-
-    /* =====================================================================
-       TIMELINE
-    ===================================================================== */
-    #timeline { background: var(--bg-mid); }
-
-    .timeline-track {
-      position: relative;
-      padding: 2.5rem 0 1rem;
-    }
-
-    .tl-line {
-      position: absolute;
-      top: 50%; left: 0; right: 0;
+      top: 5px;
+      left: 50%;
+      right: -50%;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(0,0,0,.12) 8%, rgba(0,0,0,.12) 92%, transparent);
-      transform: translateY(-50%);
+      background: #e0e0e0;
+      z-index: 0;
     }
+    .tl-item:last-child::before { display: none; }
 
-    .tl-items {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 1rem;
+    .tl-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #d0d0d0;
+      border: 2px solid #fff;
+      outline: 1px solid #d0d0d0;
+      margin-bottom: .6rem;
       position: relative;
       z-index: 1;
     }
 
-    .tl-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .42rem;
-      text-align: center;
-    }
-
-    .tl-dot {
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      background: var(--text-3);
-      border: 2px solid var(--bg-mid);
-      flex-shrink: 0;
-    }
-
-    .tl-item.current .tl-dot {
-      width: 14px; height: 14px;
-      background: var(--blue);
-      box-shadow: 0 0 0 3px rgba(26,62,120,.18);
+    .tl-item.now .tl-dot {
+      background: #1a4fbf;
+      outline-color: #1a4fbf;
+      box-shadow: 0 0 0 3px rgba(26,79,191,.15);
+      width: 12px; height: 12px;
     }
 
     .tl-era {
-      font-family: var(--ff-mono);
+      font-family: 'IBM Plex Mono', monospace;
       font-size: .58rem;
-      color: var(--text-3);
-      letter-spacing: .1em;
+      color: #bbb;
+      margin-bottom: .25rem;
     }
 
     .tl-name {
-      font-family: var(--ff-serif);
-      font-size: .82rem;
-      color: var(--text-2);
+      font-size: .8rem;
+      color: #555;
       line-height: 1.3;
+      margin-bottom: .2rem;
+    }
+    .tl-item.now .tl-name { color: #1a4fbf; font-weight: 500; }
+
+    .tl-eg {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .58rem;
+      color: #bbb;
     }
 
-    .tl-item.current .tl-name {
-      color: var(--blue);
-      font-size: .92rem;
-    }
-
-    .tl-ex {
-      font-family: var(--ff-mono);
-      font-size: .57rem;
-      color: var(--text-3);
-    }
-
-    .tl-caption {
-      text-align: center;
-      font-family: var(--ff-mono);
-      font-size: .68rem;
-      color: var(--text-3);
-      margin-top: 2rem;
-      line-height: 1.8;
-    }
-
-    /* =====================================================================
-       CITATION
-    ===================================================================== */
-    #citation { background: var(--bg-deep); }
-
-    .cit-block {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 9px;
+    /* ── CITATION ── */
+    .bibtex-wrap {
+      border: 1px solid #e5e5e5;
+      border-radius: 3px;
       overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,.05);
     }
 
-    .cit-header {
+    .bibtex-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: .65rem 1.5rem;
-      background: var(--blue-06);
-      border-bottom: 1px solid rgba(26,62,120,.10);
+      padding: .5rem 1rem;
+      background: #f7f7f7;
+      border-bottom: 1px solid #e5e5e5;
     }
 
-    .cit-label {
-      font-family: var(--ff-mono);
-      font-size: .68rem;
-      color: var(--blue);
-      letter-spacing: .14em;
+    .bibtex-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      color: #888;
+      letter-spacing: .06em;
     }
 
     .copy-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      color: var(--text-3);
-      font-family: var(--ff-mono);
-      font-size: .66rem;
-      padding: .26rem .68rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .7rem;
+      color: #555;
+      background: none;
+      border: 1px solid #d5d5d5;
+      border-radius: 2px;
+      padding: .2rem .6rem;
       cursor: pointer;
-      transition: color .2s, border-color .2s;
-      letter-spacing: .05em;
+      transition: border-color .15s, color .15s;
     }
-
-    .copy-btn:hover { color: var(--blue); border-color: rgba(26,62,120,.3); }
-    .copy-btn.ok    { color: var(--amber); border-color: rgba(181,96,26,.3); }
+    .copy-btn:hover { border-color: #999; color: #111; }
+    .copy-btn.ok { color: #1a4fbf; border-color: #1a4fbf; }
 
     pre.bibtex {
-      padding: 1.5rem 1.8rem;
-      font-family: var(--ff-mono);
+      padding: 1.2rem 1.2rem;
+      font-family: 'IBM Plex Mono', monospace;
       font-size: .8rem;
-      line-height: 1.9;
-      color: var(--text-2);
+      line-height: 1.8;
+      color: #444;
+      background: #fff;
       overflow-x: auto;
-      background: #fafaf8;
     }
 
-    .bk { color: var(--blue); }
-    .bf { color: var(--amber); }
+    .bk { color: #1a4fbf; }
+    .bf { color: #a0521a; }
 
-    /* =====================================================================
-       FOOTER
-    ===================================================================== */
+    /* ── FOOTER ── */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 2.4rem 2rem;
-      text-align: center;
-      font-family: var(--ff-mono);
-      font-size: .68rem;
-      color: var(--text-3);
-      line-height: 2;
-      background: var(--bg-mid);
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 2rem 2rem;
+      font-size: .8rem;
+      color: #aaa;
+      line-height: 1.9;
     }
 
-    footer a { color: var(--blue); }
-
-    /* =====================================================================
-       ANIMATIONS
-    ===================================================================== */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* =====================================================================
-       RESPONSIVE
-    ===================================================================== */
-    @media (max-width: 820px) {
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .fw-layout { grid-template-columns: 1fr; }
+      .contrib-list { grid-template-columns: 1fr; }
+      .paradigm { grid-template-columns: 1fr; gap: .6rem; }
+      .timeline { flex-wrap: wrap; gap: 1rem; }
+      .tl-item::before { display: none; }
       .nav-links { display: none; }
-      .fw-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-      .contrib-grid { grid-template-columns: 1fr; }
-      .paradigm-grid { grid-template-columns: 1fr; }
-      .tl-items { grid-template-columns: repeat(3, 1fr); gap: 1.4rem; }
-      .abstract-card { padding: 1.6rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- ===================================================================
-     NAV
-=================================================================== -->
+<!-- NAV -->
 <nav>
-  <div class="nav-brand">ATSF &middot; arXiv:2602.01776</div>
+  <span class="nav-id">arXiv:2602.01776</span>
   <ul class="nav-links">
     <li><a href="#abstract">Abstract</a></li>
     <li><a href="#framework">Framework</a></li>
     <li><a href="#paradigms">Paradigms</a></li>
-    <li><a href="#timeline">Evolution</a></li>
     <li><a href="#citation">Cite</a></li>
   </ul>
 </nav>
 
-<!-- ===================================================================
-     HERO
-=================================================================== -->
-<section id="hero">
-  <canvas id="hero-canvas"></canvas>
-  <div class="hero-inner">
-    <div class="hero-badge">arXiv 2026 &nbsp;&middot;&nbsp; Position Paper</div>
-    <div class="hero-type">Time Series &middot; Agentic AI</div>
-    <h1>
-      Beyond Model-Centric Prediction<br>
-      <em>Agentic Time Series Forecasting</em>
-    </h1>
-    <div class="hero-authors">
-      <span class="author lead">Mingyue Cheng</span>
-      <span class="author">Xiaoyu Tao</span>
-      <span class="author">Qi Liu</span>
-      <span class="author">Ze Guo</span>
-      <span class="author">Enhong Chen</span>
+<!-- HERO -->
+<div id="hero">
+  <div class="paper-label">Position Paper &middot; arXiv 2026</div>
+  <h1>Position: Beyond Model-Centric Prediction —<br>Agentic Time Series Forecasting</h1>
+  <div class="author-block">
+    <div class="authors">
+      <span class="lead">Mingyue Cheng</span>,
+      Xiaoyu Tao,
+      Qi Liu,
+      Ze Guo,
+      Enhong Chen
     </div>
-    <div class="hero-affil">University of Science and Technology of China</div>
-    <div class="btn-row">
-      <a href="https://arxiv.org/pdf/2602.01776" target="_blank" rel="noopener" class="btn btn-fill">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        PDF Paper
-      </a>
-      <a href="https://arxiv.org/abs/2602.01776" target="_blank" rel="noopener" class="btn btn-outline">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-        arXiv Page
-      </a>
-      <a href="#citation" class="btn btn-ghost">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-        BibTeX
-      </a>
-    </div>
+    <div class="affil">University of Science and Technology of China</div>
   </div>
-</section>
-
-<hr class="hr">
-
-<!-- ===================================================================
-     ABSTRACT
-=================================================================== -->
-<div id="abstract" class="sec" style="background:var(--bg-mid)">
-  <div class="sec-inner">
-    <div class="sec-label">01 &mdash; Abstract</div>
-    <h2>A Paradigm Shift in<br>Time Series Forecasting</h2>
-    <div class="abstract-card">
-      <div class="tldr-row">
-        <span class="tldr-pill">TL;DR</span>
-        <p>We argue that forecasting should move beyond static, model-centric pipelines toward adaptive <em>agentic</em> systems that perceive, plan, act, reflect, and remember &mdash; evolving continuously through interaction and accumulated experience.</p>
-      </div>
-      <p class="abstract-body">
-        Conventional time series forecasting treats prediction as a <strong>model-centric, static, and single-pass problem</strong>. This framing proves fundamentally inadequate for complex, adaptive, multi-turn scenarios encountered in real-world deployments. We propose <strong>Agentic Time Series Forecasting (ATSF)</strong> &mdash; a principled framework that organizes forecasting as an iterative agentic workflow. Rather than optimizing a single model&rsquo;s predictive accuracy in isolation, ATSF enables forecasting systems to interact with tools, incorporate feedback from outcomes, and evolve through accumulated experience. We formalize the framework through five interconnected cognitive components &mdash; <strong>Perception, Planning, Action, Reflection, and Memory</strong> &mdash; and propose three concrete implementation paradigms: workflow-based design, agentic reinforcement learning, and hybrid agentic workflows. We conclude by outlining key research opportunities and open challenges to guide the community toward this new frontier.
-      </p>
-    </div>
+  <div class="links">
+    <a href="https://arxiv.org/pdf/2602.01776" target="_blank" rel="noopener" class="link-btn primary">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      PDF
+    </a>
+    <a href="https://arxiv.org/abs/2602.01776" target="_blank" rel="noopener" class="link-btn">
+      arXiv
+    </a>
+    <a href="#citation" class="link-btn">
+      BibTeX
+    </a>
   </div>
 </div>
 
-<hr class="hr">
-
-<!-- ===================================================================
-     FRAMEWORK
-=================================================================== -->
-<div id="framework" class="sec">
-  <div class="sec-inner">
-    <div class="sec-label">02 &mdash; Framework</div>
-    <h2>Five Cognitive Components<br>of ATSF</h2>
-    <div class="fw-grid">
-
-      <!-- SVG Diagram — light theme -->
-      <div class="fw-diagram">
-        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="ATSF cycle diagram">
-          <defs>
-            <marker id="arw" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
-              <path d="M0,0 L7,2.5 L0,5 Z" fill="rgba(26,62,120,.5)"/>
-            </marker>
-          </defs>
-
-          <!-- Background halo ring -->
-          <circle cx="200" cy="200" r="136" fill="none" stroke="rgba(26,62,120,.05)" stroke-width="70"/>
-
-          <!-- Animated flow arcs (clockwise) -->
-          <path d="M 240 72 A 136 136 0 0 1 311 124"
-                fill="none" stroke="rgba(26,62,120,.35)" stroke-width="1.4"
-                class="flow-arc" marker-end="url(#arw)"/>
-          <path d="M 335 197 A 136 136 0 0 1 308 282"
-                fill="none" stroke="rgba(26,62,120,.35)" stroke-width="1.4"
-                class="flow-arc" style="animation-delay:-.8s" marker-end="url(#arw)"/>
-          <path d="M 244 328 A 136 136 0 0 1 156 328"
-                fill="none" stroke="rgba(26,62,120,.35)" stroke-width="1.4"
-                class="flow-arc" style="animation-delay:-1.6s" marker-end="url(#arw)"/>
-          <path d="M 92 282 A 136 136 0 0 1 65 197"
-                fill="none" stroke="rgba(26,62,120,.35)" stroke-width="1.4"
-                class="flow-arc" style="animation-delay:-2.4s" marker-end="url(#arw)"/>
-          <path d="M 89 124 A 136 136 0 0 1 161 72"
-                fill="none" stroke="rgba(26,62,120,.35)" stroke-width="1.4"
-                class="flow-arc" style="animation-delay:-3.2s" marker-end="url(#arw)"/>
-
-          <!-- Center label -->
-          <text x="200" y="196" text-anchor="middle"
-                font-family="'DM Serif Display', Georgia, serif"
-                font-size="15" fill="#18181b" font-style="italic">ATSF</text>
-          <text x="200" y="213" text-anchor="middle"
-                font-family="'IBM Plex Mono', monospace"
-                font-size="8" fill="#a1a1aa" letter-spacing="2.5">CYCLE</text>
-
-          <!-- N1: Perception (top) -->
-          <circle cx="200" cy="65" r="37" fill="#fff" stroke="rgba(26,62,120,.45)" stroke-width="1.5"/>
-          <text x="200" y="59" text-anchor="middle" font-size="16">&#128065;</text>
-          <text x="200" y="76" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
-                font-size="7.2" fill="#1a3e78" letter-spacing="1.2">PERCEPT</text>
-
-          <!-- N2: Planning (upper-right) -->
-          <circle cx="328" cy="158" r="37" fill="#fff" stroke="rgba(181,96,26,.45)" stroke-width="1.5"/>
-          <text x="328" y="152" text-anchor="middle" font-size="16">&#129504;</text>
-          <text x="328" y="169" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
-                font-size="7.2" fill="#b5601a" letter-spacing="1.2">PLANNING</text>
-
-          <!-- N3: Action (lower-right) -->
-          <circle cx="279" cy="309" r="37" fill="#fff" stroke="rgba(90,63,160,.45)" stroke-width="1.5"/>
-          <text x="279" y="303" text-anchor="middle" font-size="16">&#9889;</text>
-          <text x="279" y="320" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
-                font-size="7.2" fill="#5a3fa0" letter-spacing="1.2">ACTION</text>
-
-          <!-- N4: Reflection (lower-left) -->
-          <circle cx="121" cy="309" r="37" fill="#fff" stroke="rgba(160,48,80,.45)" stroke-width="1.5"/>
-          <text x="121" y="303" text-anchor="middle" font-size="16">&#128269;</text>
-          <text x="121" y="320" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
-                font-size="7.2" fill="#a03050" letter-spacing="1.2">REFLECT</text>
-
-          <!-- N5: Memory (upper-left) -->
-          <circle cx="72" cy="158" r="37" fill="#fff" stroke="rgba(26,106,62,.45)" stroke-width="1.5"/>
-          <text x="72" y="152" text-anchor="middle" font-size="16">&#128190;</text>
-          <text x="72" y="169" text-anchor="middle" font-family="'IBM Plex Mono',monospace"
-                font-size="7.2" fill="#1a6a3e" letter-spacing="1.2">MEMORY</text>
-        </svg>
-      </div>
-
-      <!-- Pillar descriptions -->
-      <div class="pillar-list">
-        <div class="pillar" style="transition-delay:.08s">
-          <div class="pillar-icon" style="background:rgba(26,62,120,.07)">&#128065;</div>
-          <div class="pillar-body">
-            <h4 style="color:var(--blue)">Perception</h4>
-            <p>Extracts task-relevant information from raw, noisy inputs. Adaptive preprocessing that determines what information matters for specific forecasting contexts &mdash; not fixed, but situationally aware.</p>
-          </div>
-        </div>
-        <div class="pillar" style="transition-delay:.16s">
-          <div class="pillar-icon" style="background:rgba(181,96,26,.07)">&#129504;</div>
-          <div class="pillar-body">
-            <h4 style="color:var(--amber)">Planning</h4>
-            <p>Formulates forecasting objectives and decomposes complex tasks into manageable subtasks. Crucially, planning is <em>dynamic</em> &mdash; revised continuously based on new observations or feedback.</p>
-          </div>
-        </div>
-        <div class="pillar" style="transition-delay:.24s">
-          <div class="pillar-icon" style="background:rgba(90,63,160,.07)">&#9889;</div>
-          <div class="pillar-body">
-            <h4 style="color:var(--purple)">Action</h4>
-            <p>Executes decisions through autonomous tool interaction. Treats forecasting itself as one action within a broader action space, enabling flexible integration of diverse methods and external APIs.</p>
-          </div>
-        </div>
-        <div class="pillar" style="transition-delay:.32s">
-          <div class="pillar-icon" style="background:rgba(160,48,80,.07)">&#128269;</div>
-          <div class="pillar-body">
-            <h4 style="color:var(--pink)">Reflection</h4>
-            <p>Enables iterative correction by evaluating, interpreting, and revising predictions. Supports self-judgment without external supervision &mdash; the system critiques its own outputs.</p>
-          </div>
-        </div>
-        <div class="pillar" style="transition-delay:.40s">
-          <div class="pillar-icon" style="background:rgba(26,106,62,.07)">&#128190;</div>
-          <div class="pillar-body">
-            <h4 style="color:var(--green)">Memory</h4>
-            <p>Preserves reusable experience &mdash; patterns, strategies, failure cases &mdash; across instances. Hierarchical access at instance, task, and domain levels enables continual learning.</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
+<!-- ABSTRACT -->
+<div id="abstract" class="section">
+  <h2>Abstract</h2>
+  <div class="tldr">
+    <strong>TL;DR</strong>
+    We argue that time series forecasting should be reframed as an agentic process — moving beyond static, model-centric pipelines toward systems that perceive, plan, act, reflect, and evolve through accumulated experience.
   </div>
+  <p class="abstract-text">
+    Conventional time series forecasting treats prediction as a model-centric, static, and single-pass problem. This framing proves fundamentally inadequate for complex, adaptive, multi-turn scenarios encountered in real-world deployments. We propose <strong>Agentic Time Series Forecasting (ATSF)</strong> — a principled framework that organizes forecasting as an iterative agentic workflow. Rather than optimizing a single model's predictive accuracy in isolation, ATSF enables forecasting systems to interact with tools, incorporate feedback from outcomes, and evolve through accumulated experience. We formalize the framework through five interconnected cognitive components — Perception, Planning, Action, Reflection, and Memory — and propose three concrete implementation paradigms: workflow-based design, agentic reinforcement learning, and hybrid agentic workflows. We conclude by outlining key research opportunities and open challenges to guide the community toward this new frontier.
+  </p>
 </div>
 
-<hr class="hr">
+<!-- FRAMEWORK -->
+<div id="framework" class="section">
+  <h2>Framework</h2>
+  <div class="fw-layout">
 
-<!-- ===================================================================
-     CONTRIBUTIONS
-=================================================================== -->
-<div id="contributions" class="sec" style="background:var(--bg-mid)">
-  <div class="sec-inner">
-    <div class="sec-label">03 &mdash; Contributions</div>
-    <h2>Key Contributions</h2>
-    <div class="contrib-grid">
-      <div class="contrib-card" style="transition-delay:.04s">
-        <div class="c-num">01</div>
-        <div class="c-title">Paradigm Formalization</div>
-        <div class="c-body">First position paper to formally define Agentic Time Series Forecasting (ATSF), establishing a principled conceptual framework grounded in cognitive science and agentic AI research.</div>
+    <div class="fw-diagram">
+      <svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arw" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+            <path d="M0,0 L6,2 L0,4 Z" fill="#bbb"/>
+          </marker>
+        </defs>
+
+        <!-- background ring -->
+        <circle cx="160" cy="160" r="108" fill="none" stroke="#f0f0f0" stroke-width="56"/>
+
+        <!-- flow arcs -->
+        <path d="M 192 58 A 108 108 0 0 1 249 99"  fill="none" stroke="#d0d0d0" stroke-width="1.2" class="flow-arc" marker-end="url(#arw)"/>
+        <path d="M 268 158 A 108 108 0 0 1 246 226" fill="none" stroke="#d0d0d0" stroke-width="1.2" class="flow-arc" style="animation-delay:-.8s" marker-end="url(#arw)"/>
+        <path d="M 195 263 A 108 108 0 0 1 125 263" fill="none" stroke="#d0d0d0" stroke-width="1.2" class="flow-arc" style="animation-delay:-1.6s" marker-end="url(#arw)"/>
+        <path d="M 74 226 A 108 108 0 0 1 52 158"  fill="none" stroke="#d0d0d0" stroke-width="1.2" class="flow-arc" style="animation-delay:-2.4s" marker-end="url(#arw)"/>
+        <path d="M 71 99 A 108 108 0 0 1 128 58"   fill="none" stroke="#d0d0d0" stroke-width="1.2" class="flow-arc" style="animation-delay:-3.2s" marker-end="url(#arw)"/>
+
+        <!-- center -->
+        <text x="160" y="156" text-anchor="middle" font-family="'Source Serif 4',Georgia,serif" font-size="13" fill="#222" font-style="italic">ATSF</text>
+        <text x="160" y="170" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="7" fill="#ccc" letter-spacing="2">CYCLE</text>
+
+        <!-- N1 Perception (top) -->
+        <circle cx="160" cy="52" r="30" fill="#fff" stroke="#1a4fbf" stroke-width="1.2"/>
+        <text x="160" y="48" text-anchor="middle" font-size="13">&#128065;</text>
+        <text x="160" y="62" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="6.5" fill="#1a4fbf" letter-spacing="1">PERCEPT</text>
+
+        <!-- N2 Planning (upper-right) -->
+        <circle cx="263" cy="122" r="30" fill="#fff" stroke="#a0521a" stroke-width="1.2"/>
+        <text x="263" y="118" text-anchor="middle" font-size="13">&#129504;</text>
+        <text x="263" y="132" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="6.5" fill="#a0521a" letter-spacing="1">PLANNING</text>
+
+        <!-- N3 Action (lower-right) -->
+        <circle cx="223" cy="247" r="30" fill="#fff" stroke="#5a3fa0" stroke-width="1.2"/>
+        <text x="223" y="243" text-anchor="middle" font-size="13">&#9889;</text>
+        <text x="223" y="257" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="6.5" fill="#5a3fa0" letter-spacing="1">ACTION</text>
+
+        <!-- N4 Reflection (lower-left) -->
+        <circle cx="97" cy="247" r="30" fill="#fff" stroke="#a03050" stroke-width="1.2"/>
+        <text x="97" y="243" text-anchor="middle" font-size="13">&#128269;</text>
+        <text x="97" y="257" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="6.5" fill="#a03050" letter-spacing="1">REFLECT</text>
+
+        <!-- N5 Memory (upper-left) -->
+        <circle cx="57" cy="122" r="30" fill="#fff" stroke="#1a6a3e" stroke-width="1.2"/>
+        <text x="57" y="118" text-anchor="middle" font-size="13">&#128190;</text>
+        <text x="57" y="132" text-anchor="middle" font-family="'IBM Plex Mono',monospace" font-size="6.5" fill="#1a6a3e" letter-spacing="1">MEMORY</text>
+      </svg>
+    </div>
+
+    <div class="pillar-list">
+      <div class="pillar">
+        <div class="pillar-head">
+          <span class="pillar-name">Perception</span>
+          <span class="pillar-tag">adaptive input</span>
+        </div>
+        <p>Extracts task-relevant information from raw, noisy inputs. Adaptive rather than fixed preprocessing — determines what information matters for each specific context.</p>
       </div>
-      <div class="contrib-card" style="transition-delay:.10s">
-        <div class="c-num">02</div>
-        <div class="c-title">Limitation Analysis</div>
-        <div class="c-body">Rigorous characterization of fundamental limitations in static, closed-loop, model-centric approaches &mdash; why they fail for adaptive, multi-turn real-world forecasting scenarios.</div>
+      <div class="pillar">
+        <div class="pillar-head">
+          <span class="pillar-name">Planning</span>
+          <span class="pillar-tag">dynamic strategy</span>
+        </div>
+        <p>Formulates forecasting objectives and decomposes complex tasks into subtasks. Revised dynamically as new observations or feedback arrive.</p>
       </div>
-      <div class="contrib-card" style="transition-delay:.16s">
-        <div class="c-num">03</div>
-        <div class="c-title">Implementation Paradigms</div>
-        <div class="c-body">Three concrete implementation strategies &mdash; Workflow-Based Design, AgenticRL, and AgentFlow &mdash; covering the full interpretability&ndash;adaptability design space.</div>
+      <div class="pillar">
+        <div class="pillar-head">
+          <span class="pillar-name">Action</span>
+          <span class="pillar-tag">tool use</span>
+        </div>
+        <p>Executes decisions through autonomous tool interaction. Forecasting is treated as one action within a broader action space, enabling integration of diverse methods.</p>
       </div>
-      <div class="contrib-card" style="transition-delay:.22s">
-        <div class="c-num">04</div>
-        <div class="c-title">Research Roadmap</div>
-        <div class="c-body">Comprehensive outline of open research challenges and future opportunities, providing a community roadmap to advance the ATSF frontier.</div>
+      <div class="pillar">
+        <div class="pillar-head">
+          <span class="pillar-name">Reflection</span>
+          <span class="pillar-tag">self-evaluation</span>
+        </div>
+        <p>Iteratively evaluates, interprets, and revises predictions. Supports self-judgment without requiring external supervision or ground-truth feedback.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-head">
+          <span class="pillar-name">Memory</span>
+          <span class="pillar-tag">continual learning</span>
+        </div>
+        <p>Preserves reusable experience — patterns, strategies, failure cases — across instances. Hierarchical access at instance, task, and domain levels.</p>
       </div>
     </div>
   </div>
 </div>
 
-<hr class="hr">
-
-<!-- ===================================================================
-     PARADIGMS
-=================================================================== -->
-<div id="paradigms" class="sec">
-  <div class="sec-inner">
-    <div class="sec-label">04 &mdash; Implementation</div>
-    <h2>Three Implementation<br>Paradigms</h2>
-    <div class="paradigm-grid">
-
-      <div class="p-card">
-        <div class="p-idx">PARADIGM &middot; 01</div>
-        <div class="p-title">Workflow-Based Design</div>
-        <div class="p-sub">Structured Cognitive Pipelines</div>
-        <div class="p-body">Structures forecasting as predefined sequences of cognitive steps using directed acyclic graphs (DAGs) or standard operating procedures. Organizes perception, planning, action, and reflection into interpretable, deterministic pipelines that are easy to audit and debug.</div>
-        <div class="tags">
-          <span class="tag tag-pro">&#10003; High Interpretability</span>
-          <span class="tag tag-pro">&#10003; Stability</span>
-          <span class="tag tag-con">&#9888; Rigid for Novel Scenarios</span>
-        </div>
-      </div>
-
-      <div class="p-card">
-        <div class="p-idx">PARADIGM &middot; 02</div>
-        <div class="p-title">Agentic RL</div>
-        <div class="p-sub">AgenticRL &mdash; Autonomous Evolution</div>
-        <div class="p-body">Applies reinforcement learning to the decisions <em>surrounding</em> forecasting &mdash; objective planning, action selection, strategy revision &mdash; rather than predictive models alone. Enables autonomous discovery of novel forecasting strategies beyond human-designed heuristics.</div>
-        <div class="tags">
-          <span class="tag tag-pro">&#10003; Autonomous Evolution</span>
-          <span class="tag tag-pro">&#10003; Novel Discovery</span>
-          <span class="tag tag-con">&#9888; Training Instability</span>
-        </div>
-      </div>
-
-      <div class="p-card">
-        <div class="p-idx">PARADIGM &middot; 03</div>
-        <div class="p-title">Hybrid Agentic Workflow</div>
-        <div class="p-sub">AgentFlow &mdash; Best of Both Worlds</div>
-        <div class="p-body">Integrates explicit workflow design with localized reinforcement learning at specific decision points. Balances the stability and interpretability of structured workflows with the adaptability of learned strategies, enabling controlled evolution within safe boundaries.</div>
-        <div class="tags">
-          <span class="tag tag-pro">&#10003; Balanced Design</span>
-          <span class="tag tag-pro">&#10003; Adaptable</span>
-          <span class="tag tag-con">&#9888; Architectural Complexity</span>
-        </div>
-      </div>
-
+<!-- CONTRIBUTIONS -->
+<div id="contributions" class="section">
+  <h2>Contributions</h2>
+  <div class="contrib-list">
+    <div class="contrib-item">
+      <div class="contrib-num">01</div>
+      <h4>Paradigm Formalization</h4>
+      <p>First position paper to formally define the ATSF paradigm, establishing a principled conceptual framework for agentic forecasting.</p>
+    </div>
+    <div class="contrib-item">
+      <div class="contrib-num">02</div>
+      <h4>Limitation Analysis</h4>
+      <p>Rigorous characterization of why static, model-centric approaches fail in adaptive, multi-turn real-world forecasting scenarios.</p>
+    </div>
+    <div class="contrib-item">
+      <div class="contrib-num">03</div>
+      <h4>Implementation Paradigms</h4>
+      <p>Three concrete strategies spanning the interpretability–adaptability design space, with comparative analysis of mechanisms and trade-offs.</p>
+    </div>
+    <div class="contrib-item">
+      <div class="contrib-num">04</div>
+      <h4>Research Roadmap</h4>
+      <p>Comprehensive outline of open challenges and future research directions to guide the community toward this new frontier.</p>
     </div>
   </div>
 </div>
 
-<hr class="hr">
-
-<!-- ===================================================================
-     TIMELINE
-=================================================================== -->
-<div id="timeline" class="sec" style="background:var(--bg-mid)">
-  <div class="sec-inner">
-    <div class="sec-label">05 &mdash; Evolution</div>
-    <h2>The Forecasting Paradigm<br>Evolution</h2>
-    <div class="timeline-track">
-      <div class="tl-line"></div>
-      <div class="tl-items">
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-era">Era I</div>
-          <div class="tl-name">Statistical Models</div>
-          <div class="tl-ex">ARIMA &middot; Prophet</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-era">Era II</div>
-          <div class="tl-name">Machine Learning</div>
-          <div class="tl-ex">XGBoost &middot; LightGBM</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-era">Era III</div>
-          <div class="tl-name">Deep Learning</div>
-          <div class="tl-ex">Informer &middot; PatchTST</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-era">Era IV</div>
-          <div class="tl-name">Foundation Models</div>
-          <div class="tl-ex">Chronos &middot; TimesFM</div>
-        </div>
-        <div class="tl-item">
-          <div class="tl-dot"></div>
-          <div class="tl-era">Era V</div>
-          <div class="tl-name">LLM-Based</div>
-          <div class="tl-ex">Time-LLM &middot; PromptCast</div>
-        </div>
-        <div class="tl-item current">
-          <div class="tl-dot"></div>
-          <div class="tl-era">Era VI &#10022;</div>
-          <div class="tl-name">Agentic TSF</div>
-          <div class="tl-ex">ATSF Framework</div>
+<!-- PARADIGMS -->
+<div id="paradigms" class="section">
+  <h2>Implementation Paradigms</h2>
+  <div class="paradigm-list">
+    <div class="paradigm">
+      <div class="paradigm-meta">
+        <div class="paradigm-idx">01</div>
+        <div class="paradigm-name">Workflow-Based Design</div>
+        <div class="paradigm-abbr">Structured Pipelines</div>
+      </div>
+      <div class="paradigm-body">
+        <p>Structures forecasting as predefined sequences of cognitive steps using directed acyclic graphs (DAGs) or standard operating procedures. Organizes the five ATSF components into interpretable, deterministic pipelines.</p>
+        <div class="tag-row">
+          <span class="tag tag-pro">Interpretable</span>
+          <span class="tag tag-pro">Stable</span>
+          <span class="tag tag-con">Rigid for unseen scenarios</span>
         </div>
       </div>
     </div>
-    <p class="tl-caption">
-      Each paradigm overcomes limitations of its predecessor<br>
-      ATSF introduces tool use &middot; feedback loops &middot; continuous evolution &middot; adaptive multi-turn reasoning
-    </p>
+    <div class="paradigm">
+      <div class="paradigm-meta">
+        <div class="paradigm-idx">02</div>
+        <div class="paradigm-name">Agentic RL</div>
+        <div class="paradigm-abbr">AgenticRL</div>
+      </div>
+      <div class="paradigm-body">
+        <p>Applies reinforcement learning to the decisions surrounding forecasting — objective planning, action selection, strategy revision — rather than to predictive models alone. Enables autonomous discovery of novel strategies.</p>
+        <div class="tag-row">
+          <span class="tag tag-pro">Autonomous evolution</span>
+          <span class="tag tag-pro">Novel strategy discovery</span>
+          <span class="tag tag-con">Training instability</span>
+        </div>
+      </div>
+    </div>
+    <div class="paradigm">
+      <div class="paradigm-meta">
+        <div class="paradigm-idx">03</div>
+        <div class="paradigm-name">Hybrid Agentic Workflow</div>
+        <div class="paradigm-abbr">AgentFlow</div>
+      </div>
+      <div class="paradigm-body">
+        <p>Integrates explicit workflow design with localized reinforcement learning at specific decision points. Balances the stability of structured workflows with the adaptability of learned strategies.</p>
+        <div class="tag-row">
+          <span class="tag tag-pro">Balanced design</span>
+          <span class="tag tag-pro">Adaptable</span>
+          <span class="tag tag-con">Architectural complexity</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<hr class="hr">
+<!-- TIMELINE -->
+<div id="timeline" class="section">
+  <h2>Paradigm Evolution</h2>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-era">Era I</div>
+      <div class="tl-name">Statistical</div>
+      <div class="tl-eg">ARIMA, Prophet</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-era">Era II</div>
+      <div class="tl-name">Machine Learning</div>
+      <div class="tl-eg">XGBoost, LightGBM</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-era">Era III</div>
+      <div class="tl-name">Deep Learning</div>
+      <div class="tl-eg">Informer, PatchTST</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-era">Era IV</div>
+      <div class="tl-name">Foundation Models</div>
+      <div class="tl-eg">Chronos, TimesFM</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-era">Era V</div>
+      <div class="tl-name">LLM-Based</div>
+      <div class="tl-eg">Time-LLM</div>
+    </div>
+    <div class="tl-item now">
+      <div class="tl-dot"></div>
+      <div class="tl-era">Era VI</div>
+      <div class="tl-name">Agentic TSF</div>
+      <div class="tl-eg">ATSF</div>
+    </div>
+  </div>
+</div>
 
-<!-- ===================================================================
-     CITATION
-=================================================================== -->
-<div id="citation" class="sec">
-  <div class="sec-inner">
-    <div class="sec-label">06 &mdash; Citation</div>
-    <h2>Cite This Work</h2>
-    <div class="cit-block">
-      <div class="cit-header">
-        <span class="cit-label">BibTeX</span>
-        <button class="copy-btn" id="copyBtn">Copy</button>
-      </div>
-      <pre class="bibtex" id="bibtexPre"><span class="bk">@article</span>{cheng2026atsf,
+<!-- CITATION -->
+<div id="citation" class="section">
+  <h2>Citation</h2>
+  <div class="bibtex-wrap">
+    <div class="bibtex-bar">
+      <span class="bibtex-label">BibTeX</span>
+      <button class="copy-btn" id="copyBtn">Copy</button>
+    </div>
+    <pre class="bibtex"><span class="bk">@article</span>{cheng2026atsf,
   <span class="bf">title</span>   = {Position: Beyond Model-Centric Prediction --
               Agentic Time Series Forecasting},
   <span class="bf">author</span>  = {Cheng, Mingyue and Tao, Xiaoyu and Liu, Qi
@@ -1097,110 +728,35 @@
   <span class="bf">journal</span> = {arXiv preprint arXiv:2602.01776},
   <span class="bf">year</span>    = {2026}
 }</pre>
-    </div>
   </div>
 </div>
 
-<!-- ===================================================================
-     FOOTER
-=================================================================== -->
+<!-- FOOTER -->
 <footer>
   <p>
-    <a href="https://arxiv.org/abs/2602.01776" target="_blank" rel="noopener">arXiv:2602.01776</a>
-    &nbsp;&middot;&nbsp;
-    Submitted February 2026
-    &nbsp;&middot;&nbsp;
-    Mingyue Cheng, Xiaoyu Tao, Qi Liu, Ze Guo, Enhong Chen
+    Mingyue Cheng, Xiaoyu Tao, Qi Liu, Ze Guo, Enhong Chen &middot;
+    University of Science and Technology of China
   </p>
-  <p style="margin-top:.4rem">University of Science and Technology of China</p>
+  <p>
+    <a href="https://arxiv.org/abs/2602.01776">arXiv:2602.01776</a>
+    &middot; Submitted February 2026
+  </p>
 </footer>
 
-<!-- ===================================================================
-     SCRIPTS
-=================================================================== -->
 <script>
-(function () {
-  /* ---- Hero canvas: very subtle time series on light bg ---- */
-  const canvas = document.getElementById('hero-canvas');
-  const ctx = canvas.getContext('2d');
-
-  function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  const waves = [
-    { phase:0,   speed:.0024, amp:38, color:'rgba(26,62,120,.18)',  lw:1.4 },
-    { phase:1.6, speed:.0016, amp:22, color:'rgba(26,62,120,.10)',  lw:1.0 },
-    { phase:3.1, speed:.0032, amp:30, color:'rgba(181,96,26,.12)',  lw:0.9 },
-    { phase:0.9, speed:.0012, amp:16, color:'rgba(26,62,120,.08)',  lw:0.7 },
-    { phase:4.7, speed:.0020, amp:46, color:'rgba(26,62,120,.06)',  lw:0.6 },
-  ];
-
-  function sig(x, p) {
-    return (
-      Math.sin(x * .007  + p)       * .38 +
-      Math.sin(x * .018  + p * 1.5) * .22 +
-      Math.sin(x * .003  + p * .6)  * .40
-    );
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const H = canvas.height, W = canvas.width;
-    waves.forEach((w, i) => {
-      w.phase += w.speed;
-      const baseY = H * (.22 + i * .14);
-      ctx.beginPath();
-      ctx.strokeStyle = w.color;
-      ctx.lineWidth   = w.lw;
-      ctx.moveTo(0, baseY + sig(0, w.phase) * w.amp);
-      for (let x = 2; x < W; x += 2) {
-        ctx.lineTo(x, baseY + sig(x, w.phase) * w.amp);
-      }
-      ctx.stroke();
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-
-  /* ---- Intersection observer: scroll-in animations ---- */
-  const io = new IntersectionObserver(
-    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),
-    { threshold: .18 }
-  );
-  document.querySelectorAll('.pillar, .contrib-card').forEach(el => io.observe(el));
-
-  /* ---- Copy BibTeX ---- */
-  document.getElementById('copyBtn').addEventListener('click', function () {
-    const text = `@article{cheng2026atsf,\n  title   = {Position: Beyond Model-Centric Prediction -- Agentic Time Series Forecasting},\n  author  = {Cheng, Mingyue and Tao, Xiaoyu and Liu, Qi and Guo, Ze and Chen, Enhong},\n  journal = {arXiv preprint arXiv:2602.01776},\n  year    = {2026}\n}`;
-    const copy = (t) => {
-      this.textContent = 'Copied!';
-      this.classList.add('ok');
-      setTimeout(() => { this.textContent = 'Copy'; this.classList.remove('ok'); }, 2200);
-    };
-    navigator.clipboard ? navigator.clipboard.writeText(text).then(copy) : (() => {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta); copy();
-    })();
-  });
-
-  /* ---- Active nav link ---- */
-  const ids = ['abstract','framework','contributions','paradigms','timeline','citation'];
-  window.addEventListener('scroll', () => {
-    const sy = window.scrollY + 110;
-    ids.forEach(id => {
-      const el = document.getElementById(id);
-      const a  = document.querySelector(`nav a[href="#${id}"]`);
-      if (!el || !a) return;
-      a.classList.toggle('active', sy >= el.offsetTop && sy < el.offsetTop + el.offsetHeight);
-    });
-  }, { passive: true });
-})();
+document.getElementById('copyBtn').addEventListener('click', function () {
+  const text = `@article{cheng2026atsf,\n  title   = {Position: Beyond Model-Centric Prediction -- Agentic Time Series Forecasting},\n  author  = {Cheng, Mingyue and Tao, Xiaoyu and Liu, Qi and Guo, Ze and Chen, Enhong},\n  journal = {arXiv preprint arXiv:2602.01776},\n  year    = {2026}\n}`;
+  const done = () => {
+    this.textContent = 'Copied';
+    this.classList.add('ok');
+    setTimeout(() => { this.textContent = 'Copy'; this.classList.remove('ok'); }, 2000);
+  };
+  navigator.clipboard ? navigator.clipboard.writeText(text).then(done) : (() => {
+    const t = document.createElement('textarea');
+    t.value = text; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); document.body.removeChild(t); done();
+  })();
+});
 </script>
 
 </body>
